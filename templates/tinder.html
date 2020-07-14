@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- action='some other page-->
+<head>
+    <style>
+        form > div {
+            /* display: grid;
+            grid-template-columns: 5fr 1fr;
+            align-items: center;
+            grid-gap:5px; */
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px,1fr));
+            margin: 5vh 5vw;
+            grid-gap: 5vw;
+        }
+
+        .submit *{
+            display:block;
+            width:50%;
+            margin:0 auto;
+        }
+    </style>
+</head>
+
+<main>
+    <form method='POST'>{% csrf_token %}
+        {{ all_option_forms.management_form }}
+        <div class='options_grid'>
+        {% for form in all_option_forms %}
+            <div class='option_container'>
+                {{ form.instance.option }}
+                {{ form.as_p }}    
+            </div>
+        {% endfor %}
+        </div>
+        <a href="{% url 'form' %}" class="submit"><input type='submit' value='Save' ></a>
+    </form>
+</main>
+
+{% endblock content %}
