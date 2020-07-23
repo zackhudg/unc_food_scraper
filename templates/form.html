@@ -4,30 +4,80 @@
 <!-- action='some other page-->
 <head>
     <style>
+        html *{
+            border-radius: .3vh;
+            font-family: "Open Sans", sans-serif;        }
+
         main{
             display:grid;
-            grid-template-columns: 1fr 6fr;
-            margin: 5vh 5vw;
-            grid-gap: 5vw;
+            grid-template-columns: 1fr 4fr;
+            grid-template-rows:1fr;
+
         }
 
-        form *{
-            width:100%;
+        /* .calendar_container{
+            border: rgb(19, 41, 75) .5vh solid solid;
+        } */
+
+        .calendar_header{
+            display:grid;
+            height:9.5vh;
+            grid-template-columns: 1fr 4fr 1fr;
+            background-color:#4b9cd3;
+            color:white;
         }
+
+        .calendar_header h1{
+            font-size: 8vh;
+            text-align: center;
+        }
+
+        .days_header{
+            display:flex;
+            justify-content: space-around;
+            width:100%;
+            height:7vh;
+            font-size: 5vh;
+        }
+
+        .days_header span{
+            width:100%;
+            text-align: center;
+            padding-top: 1vh;
+            background-color:#f7f7f7;
+            border-left:.1vh solid white;
+            border-right:.1vh solid white;
+            margin:.1vh;
+        }
+
+        .form_block{
+            background-color: white;
+            padding:5px;
+            margin:5px;
+            overflow-y:auto;
+        }
+
+        input[type='number'], input[type='date']{
+            width:50%;
+        }
+
+        
 
         ul {
             display:grid;
             grid-template-columns: repeat(7, 1fr);
-            height:80vh;
+            height:60vh;
         }
 
         li{
+            margin:.1vh;
+            font-size: 19px;
+            background-color:#f7f7f7;
             list-style: none;
-            border:1px solid black;
-        }
-        
-        li span {
-            display:flex;
+            border:.1vh solid white;
+            height:16.3vh;
+            overflow-y:auto;
+            
         }
 
         .grayed_out{
@@ -35,52 +85,183 @@
         }
 
         .true {
-            background: lightgreen;
+            background: #a2d174;
+            
         }
+
+        .form_container{
+            display:flex;
+            justify-content:space-between;
+            padding:0;
+            margin:20px 5px;
+
+        }
+
+        .form_container *{
+            padding:0;
+            cursor:pointer;
+
+        }
+
+        input[type="checkbox"]{
+            height:0;
+            width:0;
+            opacity:0;
+        }
+
+        .custom_check{
+            padding:0px;
+            width:1.5em;
+            height:1.5em;
+            display:block;
+            position:relative;
+            background-color:#eeeeee;
+        }
+
+
+        .submit{
+            height:100%;
+            width:100%;
+            background-color: rgb(19, 41, 75);
+            color:white;
+            border-radius: 0;
+            border: none;
+            font-size: 30px;
+            cursor:pointer;
+        }
+
+        .custom_check:after{
+            content:"";
+            position:absolute;
+            display:block;
+            height:1.5em;
+            width:0;
+            border:solid red;
+            border-width: 0 5px 0 0;
+            transform:translate(.63em, 0) rotate(45deg)
+        }
+        .custom_check:before{
+            content:"";
+            position:absolute;
+            display:block;
+            height:1.5em;
+            width:0;
+            border:solid red;
+            border-width: 0 5px 0 0;
+            transform:translate(.63em, 0) rotate(-45deg);
+        }
+
+        .form_container input:checked ~ .custom_check:after{
+            height:1em;
+            width:.5em;
+            border:solid #58b100;
+            border-width: 0 5px 5px 0;
+            transform:translate(.4em, -.1em) rotate(45deg);
+        }
+        .form_container input:checked ~ .custom_check:before{
+            display:none;
+        }
+
+        form {
+            border: 5px solid #4b9cd3;
+            height:96vh;
+            display:flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            margin:1.5vh;
+
+            overflow: auto;
+        }
+
+        p{
+            padding:.32vh 0;
+            border-radius: 0;
+        }
+
+        hr {
+            padding:0;
+            margin:15px 5px;
+            color:#dddddd;
+        }
+
+        form *{
+            font-size: 20px;
+        }
+
+        /* span{
+            align-self: flex-start;
+        }
+
+        input{
+            align-self: flex-end;
+        } */
     </style>
 </head>
 
 <main>
-    <form method='POST'>{% csrf_token %}
-        {{ form.as_p }}
-        <input type='submit' value='Save'>
+    <form method='POST' class='input_form'>{% csrf_token %}
+        <label class="form_container"><span>Start Date</span>{{ form.0 }}</label>
+
+        <label class="form_container"><span>End Date</span>{{ form.1 }}</label>
+        <label class="form_container"><span>{{form.2.label}}</span>{{ form.2 }}</label>
+        <hr />
+        <label class="form_container"><span>{{form.3.label}}</span>{{ form.3 }}<span class='custom_check'></span></label>
+        <label class="form_container"><span>{{form.4.label}}</span>{{ form.4 }}<span class='custom_check'></span></label>
+        <hr />
+        <label class="form_container check_container"><span>{{form.5.label}}</span>{{ form.5 }}<span class='custom_check'></span></label>
+        <label class="form_container check_container"><span>{{form.6.label}}</span>{{ form.6 }}<span class='custom_check'></span></label>
+        <label class="form_container check_container"><span>{{form.7.label}}</span>{{ form.7 }}<span class='custom_check'></span></label>
+        <label class="form_container check_container"><span>{{form.8.label}}</span>{{ form.8 }}<span class='custom_check'></span></label>
+        <hr />
+        <label class="form_container check_container"><span>Re-evalute Foods</span>{{ form.9 }}<span class='custom_check'></span></label>
+        <input class='submit' type='submit' value='Submit!'>
     </form>
 
     <div class='calendar_container'>
         <div class='calendar_header'>
-            <h1 class='calendar_left'>&lt;</h1>
-            <h1 class='calendar_month' id="month_integer">{{ data.start_date.month }}</h1>
-            <h1 class='calendar_right'>&gt;</h1>
+            <h1 class='calendar_left'>&laquo; Prev</h1>
+            <h1 class='calendar_month' id="month_integer">{{ data.startdate.month }}</h1>
+            <h1 class='calendar_right'>Next &raquo;</h1>
+        </div>
+        <div class='days_header'>
+            <span>Sun</span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+
         </div>
         <div class="calendar_body">
             {% for month in dates_in_calendar %}
                 {% ifequal forloop.counter0 0 %}
-                <ul class='month-{{ forloop.counter0|add:data.start_date.month }} current'>
+                <ul class='month-{{ forloop.counter0|add:data.startdate.month }} current'>
                     {% for day, value in month.items %}
-                        {% if data.start_date <= day and day <= data.end_date and day.month == forloop.parentloop.counter0|add:data.start_date.month %}
+                        {% if data.startdate <= day and day <= data.enddate and day.month == forloop.parentloop.counter0|add:data.startdate.month %}
                              <li class='day'>                       
-                                <span class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></span>
+                                <p class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></p>
 
                                 {% if data.breakfast %}
-                                <br />
-                                <span class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "N/A"%})</span>
+                                
+                                <p class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "0" %})</p>
                                 {% endif %}
 
                                 {% if data.brunch %}
-                                <br />
-                                <span class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "N/A"%})</span>                                {% endif %}
+                                
+                                <p class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "0" %})</p>                                {% endif %}
 
                                 {% if data.lunch %}
-                                <br />
-                                <span class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "N/A"%})</span>                                {% endif %}
+                                
+                                <p class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "0" %})</p>                                {% endif %}
 
                                 {% if data.dinner %}
-                                <br />
-                                <span class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "N/A"%})</span> 
+                                
+                                <p class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "0" %})</p> 
                                 {% endif %}
                             </li>  
-                        {% elif day.month == forloop.parentloop.counter0|add:data.start_date.month %}
-                            <li class="grayed_out">{{day}}</li>
+                        {% elif day.month == forloop.parentloop.counter0|add:data.startdate.month %}
+                            <li class="grayed_out"><strong>{{day}}</strong></li>
                         {% else %}
                             <li class="grayed_out"></li>
                         {% endif %}
@@ -88,34 +269,34 @@
                     {% endfor %}
                 </ul>
                 {% else %}
-                <ul class='month-{{ forloop.counter0|add:data.start_date.month }}' style="display:none;">
+                <ul class='month-{{ forloop.counter0|add:data.startdate.month }}' style="display:none;">
                     {% for day, value in month.items %}
-                        {% if data.start_date <= day and day <= data.end_date and day.month == forloop.parentloop.counter0|add:data.start_date.month %}
+                        {% if data.startdate <= day and day <= data.enddate and day.month == forloop.parentloop.counter0|add:data.startdate.month %}
                              <li class='day'>                       
-                                <span class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></span>
+                                <p class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></p>
 
                                 {% if data.breakfast %}
-                                <br />
-                                <span class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "N/A"%})</span>
+                                
+                                <p class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "0" %})</p>
                                 {% endif %}
 
                                 {% if data.brunch %}
-                                <br />
-                                <span class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "N/A"%})</span>
+                                
+                                <p class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "0" %})</p>
                                 {% endif %}
 
                                 {% if data.lunch %}
-                                <br />
-                                <span class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "N/A"%})</span>
+                                
+                                <p class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "0" %})</p>
                                 {% endif %}
 
                                 {% if data.dinner %}
-                                <br />
-                                <span class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "N/A"%})</span>
+                                
+                                <p class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "0" %})</p>
                                 {% endif %}
                             </li>  
-                        {% elif day.month == forloop.parentloop.counter0|add:data.start_date.month %}
-                            <li class="grayed_out">{{day}}</li>
+                        {% elif day.month == forloop.parentloop.counter0|add:data.startdate.month %}
+                            <li class="grayed_out"><strong>{{day}}</strong></li>
                         {% else %}
                             <li class="grayed_out"></li>
                         {% endif %}
@@ -154,7 +335,7 @@
         if (current.previousElementSibling==null){
             left.innerHTML="";
         }
-        right.innerHTML=">";
+        right.innerHTML="Next »";
 
         if(document.getElementById("month_integer").innerHTML == 1) document.getElementById("month_integer").innerHTML = 12;
         else document.getElementById("month_integer").innerHTML = parseInt(document.getElementById("month_integer").innerHTML)-1;
@@ -173,7 +354,7 @@
         if (current.nextElementSibling==null){
             right.innerHTML="";
         }
-        left.innerHTML="<";
+        left.innerHTML=" « Prev";
 
         if(document.getElementById("month_integer").innerHTML == 12) document.getElementById("month_integer").innerHTML = 1;
         else document.getElementById("month_integer").innerHTML = parseInt(document.getElementById("month_integer").innerHTML)+1;

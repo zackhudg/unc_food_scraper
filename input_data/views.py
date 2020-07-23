@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from .models import Input_Data, Meal, Option
 from .forms import InputForm, TinderSwipeForm
@@ -7,17 +7,62 @@ import datetime
 import heapq
 from .utils import scrape
 from django import forms
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 #, RawInputForm
 
 
 # Create your views here.
 
+def signup_view(request, *args, **kwargs):
+    if request.user.is_authenticated:
+        print(request.user.username, "WAS REDIRECTED")
+        return HttpResponseRedirect('/')
+    form = UserCreationForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        username = form.cleaned_data.get('username')
+        raw_password = form.cleaned_data.get('password1')
+        user = authenticate(username=username, password=raw_password)
+
+        input_data = Input_Data.objects.create(user=user)
+
+        login(request, user) 
+        print("FORM WAS VALIDATED")
+        return HttpResponseRedirect('/')
+    print("FORM WAS NOT VALIDATED")
+    return render(request, 'signup.html', {'form': form})
+
+def signin_view(request, *args, **kwargs):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect('/')
+    form = AuthenticationForm(request=request, data=request.POST or None)
+    if form.is_valid():
+        print("SIGNIN VALID")
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            print("USER IS NOT NONE")
+            login(request, user)
+            return HttpResponseRedirect('/')
+    # if form.is_valid():
+    #     form.save()
+    print("SIGNIN INVALID")
+    return render(request, 'signin.html', {'form': form})   
+
+
+def signout_view(request, *args, **kwargs):
+    if request.user.is_authenticated:
+        logout(request)
+    return HttpResponseRedirect('/signin')
+
 
 def form_view(request, *args, **kwargs):
     cal = calendar.Calendar(firstweekday=6)
-    start_date = datetime.date.today()
-    end_date = datetime.date.today()
+    startdate = datetime.date.today()
+    enddate = datetime.date.today()
 
     #.itermonthdays(year,month) (returns somethin like 0 0 0 0 1 2 3 ... 31 0 0 )
 
@@ -33,13 +78,15 @@ def form_view(request, *args, **kwargs):
     #         User_Input.objects.create(**form.cleaned_data)
     #     else:
     #         print(form.errors)
+    dates_checked = set()
     best_meals=list()
 
     def getMealDictionary(date, month_index):
-        if data.start_date <= date <= data.end_date:
-            print(date.isoformat()) 
+        if data.startdate <= date <= data.enddate and date not in dates_checked:
+            dates_checked.add(date)
+            # print(date.isoformat()) 
             meals = Meal.objects.filter(date=date) #try to procure this all at once instead of daily
-            # meals = Meal.objects.filter(date__range=[data.start_date, data.end_date])
+            # meals = Meal.objects.filter(date__range=[data.startdate, data.enddate])
             todays_meals_dict = dict()
             if not data.breakfast:
                 meals = meals.exclude(meal='breakfast')
@@ -49,8 +96,12 @@ def form_view(request, *args, **kwargs):
                 meals = meals.exclude(meal='lunch')
             if not data.dinner:
                 meals = meals.exclude(meal='dinner')
+            if not data.lenoir:
+                meals = meals.exclude(location='lenoir')
+            if not data.chase:
+                meals = meals.exclude(location='chase')
             for each in meals:
-                print(each.id)
+                print(each.id, each.date, each.meal, each.location)
                 score = 0
                 for option in each.options.all():
                     if option.score:
@@ -58,43 +109,46 @@ def form_view(request, *args, **kwargs):
                         score+=1
                 if each.meal not in todays_meals_dict: 
                     todays_meals_dict[each.meal] = (score, each.location, False)
-                    if len(best_meals) < data.swipes-1:
-                        best_meals.append((score, month_index, date, each.meal))
-                    elif len(best_meals) < data.swipes:
-                        best_meals.append((score, month_index, date, each.meal))
-                        best_meals.sort()
-                    elif score > best_meals[0][0]:
-                        best_meals[0]=(score, month_index, date, each.meal)
-                        best_meals.sort()
+                        # for each in best_meals:
+                            # print("CHOSEN:")
+                            # print (each[2], each[3])
                 else:
-                    (compare_score, compare_location) = todays_meals_dict[each.meal]
+                    (compare_score, compare_location, chosen) = todays_meals_dict[each.meal]
                     if score > compare_score:
                         todays_meals_dict[each.meal] = (score, each.location, False)
+                if len(best_meals) < data.swipes-1:
+                    best_meals.append((score, month_index, date, each.meal))
+                elif len(best_meals) < data.swipes:
+                    best_meals.append((score, month_index, date, each.meal))
+                    best_meals.sort()
+                elif score > best_meals[0][0]:
+                    best_meals[0]=(score, month_index, date, each.meal)
+                    best_meals.sort()
             return todays_meals_dict
         return None
 
 
     dates_in_calendar = list()
-    data = Input_Data.objects.first()
+    data = Input_Data.objects.get(user=request.user)
     print("DATA:", data)
-    form=InputForm(request.POST or None, instance=data)
+    form=InputForm(request.POST or None, instance=data)   #auto_id="%s" not necessary abymore but eh
     if form.is_valid():
         print("VALID")
         #form=InputForm(request.POST, instance=data)
         data = form.save()
 
-        if data.judge_options:
+        if data.judgeoptions:
             for each in Option.objects.all():
-                each.needs_judgement=True
+                each.needsjudgement=True
                 each.save()
 
-        for year in range(data.start_date.year, data.end_date.year+1):
-            for month in range(data.start_date.month, data.end_date.month+1):
+        for year in range(data.startdate.year, data.enddate.year+1):
+            for month in range(data.startdate.month, data.enddate.month+1):
                 # dates_in_month = list(cal.itermonthdates(year, month))
                 # dates_in_calendar.append(dates_in_month)
                 #print(dates_in_month[0])
                 for each_date in cal.itermonthdates(year, month):
-                    if data.start_date <= each_date <= data.end_date:
+                    if data.startdate <= each_date <= data.enddate:
                         #MAKE SURE NOT REPEAT OURSELVES HERE
                         #use unique_constraint then try unique_togetehr
                         #dont make a meal unless it exists though... do this in scrape
@@ -128,30 +182,30 @@ def form_view(request, *args, **kwargs):
 
 
     # get dates
-    # start_date = data.start_date
-    # end_date = data.end_date
+    # startdate = data.startdate
+    # enddate = data.enddate
     graydates_pre=0
     # graydates_post=0
 
     month_index=0
     #I could do the first one manually so i dont have to check if first month every time
-    for year in range(data.start_date.year, data.end_date.year+1):
-        for month in range(data.start_date.month, data.end_date.month+1):
+    for year in range(data.startdate.year, data.enddate.year+1):
+        for month in range(data.startdate.month, data.enddate.month+1):
             dates_in_month = {date:getMealDictionary(date, month_index) for date in cal.itermonthdates(year, month)}
             # print("BEST_MEALS:  ", best_meals)             
-            if month==data.start_date.month:
+            if month==data.startdate.month:
                 for each in dates_in_month:
-                    if each < data.start_date:
+                    if each < data.startdate:
                         graydates_pre+=1
-            # if month==data.end_date.month:
+            # if month==data.enddate.month:
             #     for each in dates_in_month:
-            #         if each > data.end_date:
+            #         if each > data.enddate:
             #             graydates_pre+=1
             dates_in_calendar.append(dates_in_month)
             month_index+=1
             #print(dates_in_month[0])
             # for each_date in dates_in_month:
-            #     if data.start_date <= each_date <= data.end_date:
+            #     if data.startdate <= each_date <= data.enddate:
                     #MAKE SURE NOT REPEAT OURSELVES HERE
                     #use unique_constraint then try unique_togetehr
                     #dont make a meal unless it exists though... do this in scrape
@@ -190,10 +244,10 @@ def form_view(request, *args, **kwargs):
     #     counter += 1
     # print(meals_context)
 
-    #days = list(cal.itermonthdays(start_date.year, start_date.month))
+    #days = list(cal.itermonthdays(startdate.year, startdate.month))
     context = {
         #'meal_scores':meal_scores,
-        'form': form,
+        'form': list(form),
         'dates_in_calendar': dates_in_calendar,
         'data':data,
         'graydates_pre':graydates_pre,
@@ -210,16 +264,16 @@ def form_view(request, *args, **kwargs):
 #     data=Input_Data.objects.first()
 
 #     #get dates
-#     # start_date = data.start_date
-#     # end_date = data.end_date
+#     # startdate = data.startdate
+#     # enddate = data.enddate
 
-#     for year in range(data.start_date.year, data.end_date.year+1):
-#         for month in range(data.start_date.month, data.end_date.month+1):
+#     for year in range(data.startdate.year, data.enddate.year+1):
+#         for month in range(data.startdate.month, data.enddate.month+1):
 #             dates_in_month = list(cal.itermonthdates(year, month))
 #             dates_in_calendar.append(dates_in_month)
 #             #print(dates_in_month[0])
 #             for each in dates_in_month:
-#                 if data.start_date < each < data.end_date:
+#                 if data.startdate < each < data.enddate:
     
 
     #get meals at those dates
@@ -232,13 +286,13 @@ def scrape_view(request, *args, **kwargs):
     data = Input_Data.objects.first()
     cal = calendar.Calendar(firstweekday=6)
 
-    # for year in range(data.start_date.year, data.end_date.year+1):
-    #     for month in range(data.start_date.month, data.end_date.month+1):
+    # for year in range(data.startdate.year, data.enddate.year+1):
+    #     for month in range(data.startdate.month, data.enddate.month+1):
     #         # dates_in_month = list(cal.itermonthdates(year, month))
     #         # dates_in_calendar.append(dates_in_month)
     #         #print(dates_in_month[0])
     #         for each_date in cal.itermonthdates(year, month):
-    #             if data.start_date <= each_date <= data.end_date:
+    #             if data.startdate <= each_date <= data.enddate:
     #                 #MAKE SURE NOT REPEAT OURSELVES HERE
     #                 #use unique_constraint then try unique_togetehr
     #                 #dont make a meal unless it exists though... do this in scrape
@@ -258,7 +312,9 @@ def scrape_view(request, *args, **kwargs):
     # print(option_form.is_bound)
 
     OptionFormSet = forms.modelformset_factory(Option, form=TinderSwipeForm, extra=0)
-    valid_options=Option.objects.filter(needs_judgement=True)
+    valid_options=Option.objects.filter(needsjudgement=True)
+    if valid_options.count() == 0:
+        return HttpResponseRedirect('/')
     option_form = OptionFormSet(request.POST or None, queryset=valid_options)
     
     if option_form.is_valid():
@@ -266,8 +322,8 @@ def scrape_view(request, *args, **kwargs):
         option_form.save()
         for each in valid_options:
             print(each.option)
-            each.needs_judgement=False
-            print(each.needs_judgement)
+            each.needsjudgement=False
+            print(each.needsjudgement)
             each.save()
         return HttpResponseRedirect('/')
     else:

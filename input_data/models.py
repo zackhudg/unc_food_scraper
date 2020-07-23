@@ -1,10 +1,13 @@
 from django.db import models
+from django.contrib.auth.models import User
 import datetime
 
 # Create your models here.
 class Input_Data(models.Model):
-    start_date=models.DateField(default=datetime.date.today)
-    end_date=models.DateField(default=datetime.date.today)
+    user=models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+
+    startdate=models.DateField(default=datetime.date.today)
+    enddate=models.DateField(default=datetime.date.today)
 
     swipes=models.IntegerField(default=0)
 
@@ -12,18 +15,18 @@ class Input_Data(models.Model):
     chase=models.BooleanField(default=False)
 
     breakfast=models.BooleanField(default=False)
-    brunch=models.BooleanField(default=True)
+    brunch=models.BooleanField(default=False)
     lunch=models.BooleanField(default=True)
     dinner=models.BooleanField(default=True)
 
-    judge_options=models.BooleanField(default=False)
+    judgeoptions=models.BooleanField(default=False)
 
     #eventually add specific days of week as bools
 
     #id=userid
 
 class Option(models.Model):
-    needs_judgement=models.BooleanField(default=True)  #then, on render set to false
+    needsjudgement=models.BooleanField(default=True)  #then, on render set to false
 
     option=models.TextField(unique=True)
     score=models.BooleanField(default=False)

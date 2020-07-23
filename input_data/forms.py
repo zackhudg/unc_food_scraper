@@ -7,10 +7,10 @@ class DateInputType(forms.DateInput):
 class InputForm(forms.ModelForm):
     class Meta:
         model = Input_Data
-        fields = '__all__'
+        exclude=['user']
         widgets={
-            'start_date': DateInputType(),
-            'end_date': DateInputType()
+            'startdate': DateInputType(),
+            'enddate': DateInputType()
         }
 
 class TinderSwipeForm(forms.ModelForm):

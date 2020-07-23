@@ -35,15 +35,16 @@ from .models import Meal, Option
 #let view pick up the best ones
 def scrape(data, date):
     date = str(date)
-    if data.lenoir:
+    #just do both locations so one does not get ignored forever (checks if there is a meal created on a date and skips if so)
+    # if data.lenoir:       
         #COPY PASTED FROM OG PROJECT
-        url = 'https://dining.unc.edu/locations/top-of-lenoir/?date='+date
-        scrape_helper(data, date, url, 'lenoir')
+    url = 'https://dining.unc.edu/locations/top-of-lenoir/?date='+date
+    scrape_helper(data, date, url, 'lenoir')
         
-    elif data.chase:
+    # elif data.chase:
         #CHANGE THIS SFOR CHASE
-        url = 'https://dining.unc.edu/locations/top-of-lenoir/?date='+date
-        scrape_helper(data, date, url, 'chase')
+    url = 'https://dining.unc.edu/locations/chase/?date='+date
+    scrape_helper(data, date, url, 'chase')
 
 
 def scrape_helper(data, date, url, location):
@@ -126,7 +127,7 @@ def scrape_helper(data, date, url, location):
                     # current_meal.add("Deli")
                     # score += food["Deli"]
 
-                if station_name.text not in {"The Kitchen Table", "Burritos & Bowls", "The Griddle", "Rotisserie", "The Grill"}: #subjec tto change
+                if station_name.text not in {"Create","Nacho Bar", "The Griddle", "International Flavors", "The Kitchen Table", "Burritos & Bowls", "The Griddle", "Rotisserie", "The Grill", "Simply Prepared Grill"}: #subjec tto change
                     continue
 
                 # print()
