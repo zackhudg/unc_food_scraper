@@ -1,0 +1,192 @@
+{% extends 'form.html' %}
+
+{% block calendar %}
+<!-- action='some other page-->
+<head>
+    <style>
+        html{
+            background-color: white;
+        }
+
+        main{
+            display:grid;
+            grid-template-columns: 1fr 4fr;
+            grid-template-rows:1fr;
+            width:100%;
+        }
+
+        .form_container{
+            margin:1vh auto;
+            font-size:.9em;
+            width:95%;
+        }
+
+        .check_container{
+            margin:.3vh auto;
+            font-size: .75em;
+        }
+        
+        form {
+            border: none;
+            height:97vh;
+        }
+
+        a {
+            color:black;
+            text-decoration: none;
+        }
+
+        a:hover li{
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<div class='calendar_container'>
+    <div class='calendar_header'>
+        <h1 class='calendar_left'>&laquo; Prev</h1>
+        <h1 class='calendar_month' id="month_integer">{{ data.startdate.month }}</h1>
+        <h1 class='calendar_right'>Next &raquo;</h1>
+    </div>
+    <div class='days_header'>
+        <span>Sun</span>
+        <span>Mon</span>
+        <span>Tue</span>
+        <span>Wed</span>
+        <span>Thu</span>
+        <span>Fri</span>
+        <span>Sat</span>
+
+    </div>
+    <div class="calendar_body">
+        {% for month in dates_in_calendar %}
+            {% ifequal forloop.counter0 0 %}
+            <ul class='month-{{ forloop.counter0|add:data.startdate.month }} current'>
+                {% for day, value in month.items %}
+                    {% if data.startdate <= day and day <= data.enddate and day.month == forloop.parentloop.counter0|add:data.startdate.month %}
+                            <a href="https://dining.unc.edu/locations/top-of-lenoir/?date={{day}}">
+                                <li class='day'>                       
+                                    <p class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></p>
+
+                                    {% if data.breakfast %}
+                                    
+                                    <p class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "0" %})</p>
+                                    {% endif %}
+
+                                    {% if data.brunch %}
+                                    
+                                    <p class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "0" %})</p>                                {% endif %}
+
+                                    {% if data.lunch %}
+                                    
+                                    <p class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "0" %})</p>                                {% endif %}
+
+                                    {% if data.dinner %}
+                                    
+                                    <p class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "0" %})</p> 
+                                    {% endif %}
+                                </li>  
+                            </a>
+                    {% elif day.month == forloop.parentloop.counter0|add:data.startdate.month %}
+                        <li class="grayed_out">{{day}}</li>
+                    {% else %}
+                        <li class="grayed_out"></li>
+                    {% endif %}
+                        
+                {% endfor %}
+            </ul>
+            {% else %}
+            <ul class='month-{{ forloop.counter0|add:data.startdate.month }}' style="display:none;">
+                {% for day, value in month.items %}
+                    {% if data.startdate <= day and day <= data.enddate and day.month == forloop.parentloop.counter0|add:data.startdate.month %}
+                        <a href="https://dining.unc.edu/locations/top-of-lenoir/?date={{day}}">
+                            <li class='day'>                       
+                                <p class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></p>
+
+                                {% if data.breakfast %}
+                                
+                                <p class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "0" %})</p>
+                                {% endif %}
+
+                                {% if data.brunch %}
+                                
+                                <p class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "0" %})</p>
+                                {% endif %}
+
+                                {% if data.lunch %}
+                                
+                                <p class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "0" %})</p>
+                                {% endif %}
+
+                                {% if data.dinner %}
+                                
+                                <p class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "0" %})</p>
+                                {% endif %}
+                            </li>  
+                        </a>
+                    {% elif day.month == forloop.parentloop.counter0|add:data.startdate.month %}
+                        <li class="grayed_out">{{day}}</li>
+                    {% else %}
+                        <li></li>
+                    {% endif %}
+                        
+                {% endfor %}
+            </ul>
+            {% endifequal %}
+        {% endfor %}
+    </div>
+</div>
+<script>
+    let current = document.getElementsByClassName("current")[0];
+    let left = document.getElementsByClassName("calendar_left")[0];
+    let right = document.getElementsByClassName("calendar_right")[0];
+
+    left.addEventListener("click", prev_month);
+    right.addEventListener("click", next_month);
+
+    if (current.previousElementSibling==null){
+            left.innerHTML="";
+    }
+    if (current.nextElementSibling==null){
+            right.innerHTML="";
+    }
+
+    function prev_month(){
+        let prev_sibling = current.previousElementSibling;
+        if (prev_sibling==null){
+            return;
+        }
+
+        current.style.display="none";
+        prev_sibling.style.display="grid";
+        current = prev_sibling;
+        if (current.previousElementSibling==null){
+            left.innerHTML="";
+        }
+        right.innerHTML="Next »";
+
+        if(document.getElementById("month_integer").innerHTML == 1) document.getElementById("month_integer").innerHTML = 12;
+        else document.getElementById("month_integer").innerHTML = parseInt(document.getElementById("month_integer").innerHTML)-1;
+
+    }
+
+    function next_month(){
+        let next_sibling = current.nextElementSibling;
+        if (next_sibling==null){
+            return;
+        }
+
+        current.style.display="none";
+        next_sibling.style.display="grid";
+        current = next_sibling;
+        if (current.nextElementSibling==null){
+            right.innerHTML="";
+        }
+        left.innerHTML=" « Prev";
+
+        if(document.getElementById("month_integer").innerHTML == 12) document.getElementById("month_integer").innerHTML = 1;
+        else document.getElementById("month_integer").innerHTML = parseInt(document.getElementById("month_integer").innerHTML)+1;
+    }
+</script>
+
+{% endblock %}

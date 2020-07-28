@@ -1,10 +1,73 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<head>
+    <style>
+        form{
+            display:flex;
+            justify-content: space-between;
+            height:initial;
+            margin:0;
+            width:30vw;
+        }
 
+        form *{
+            margin:3vh 0;
+        }
+
+        main{
+            display:flex;
+            width:100%;
+        }
+
+        p{
+            display:flex;
+            width:90%;
+            margin:0 auto;
+        }
+
+        p label{
+            width:50%;
+
+        }
+
+        p input{
+            width:100%;
+        }
+
+        .submit{
+            border-radius: 0;
+            width:95%;
+            margin: 0 auto;
+            display:block;
+            margin:0 auto;
+            width:95%;
+            height:100%;
+            background-color: rgb(19, 41, 75);
+            color:white;
+            border: none;
+            font-size: 2em;
+            cursor:pointer;
+        }
+
+        span{
+            text-align: center;
+            margin-top:5vh;
+        }
+    </style>
+</head>
 <main>
-    <form method="post"> {% csrf_token %}{{ form.as_p }}
-        <input class='submit' type='submit' value='Submit!'>
+    <form method="post"> {% csrf_token %}
+        {% for field in form %}
+        <p>
+            {{ field.label_tag }}
+            {{ field }} 
+            {% for error in field.errors %}
+           <span>*{{ error }}*</span>
+            {% endfor %}
+        </p>
+        {% endfor %}
+        <button type="submit" class="submit">Sign up</button>
     </form>
 </main>
 

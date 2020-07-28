@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from .models import Input_Data, Meal, Option
-from .forms import InputForm, TinderSwipeForm
+from .forms import InputForm, TinderSwipeForm, UserCreateForm
 import calendar
 import datetime
 import heapq
@@ -19,7 +19,7 @@ def signup_view(request, *args, **kwargs):
     if request.user.is_authenticated:
         print(request.user.username, "WAS REDIRECTED")
         return HttpResponseRedirect('/')
-    form = UserCreationForm(request.POST or None)
+    form = UserCreateForm(request.POST or None)
     if form.is_valid():
         form.save()
         username = form.cleaned_data.get('username')
@@ -35,8 +35,8 @@ def signup_view(request, *args, **kwargs):
     return render(request, 'signup.html', {'form': form})
 
 def signin_view(request, *args, **kwargs):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect('/')
+    # if request.user.is_authenticated:
+    #     return HttpResponseRedirect('/')
     form = AuthenticationForm(request=request, data=request.POST or None)
     if form.is_valid():
         print("SIGNIN VALID")
@@ -56,10 +56,14 @@ def signin_view(request, *args, **kwargs):
 def signout_view(request, *args, **kwargs):
     if request.user.is_authenticated:
         logout(request)
-    return HttpResponseRedirect('/signin')
+    return HttpResponseRedirect('/accounts/login')
 
 
 def form_view(request, *args, **kwargs):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/auth/login')
+
+
     cal = calendar.Calendar(firstweekday=6)
     startdate = datetime.date.today()
     enddate = datetime.date.today()
@@ -102,6 +106,8 @@ def form_view(request, *args, **kwargs):
                 meals = meals.exclude(location='chase')
             for each in meals:
                 print(each.id, each.date, each.meal, each.location)
+                if each.meal == "none":
+                    continue
                 score = 0
                 for option in each.options.all():
                     if option.score:
@@ -130,6 +136,7 @@ def form_view(request, *args, **kwargs):
 
     dates_in_calendar = list()
     data = Input_Data.objects.get(user=request.user)
+    
     print("DATA:", data)
     form=InputForm(request.POST or None, instance=data)   #auto_id="%s" not necessary abymore but eh
     if form.is_valid():
@@ -159,7 +166,8 @@ def form_view(request, *args, **kwargs):
                         if meals_today.count() > 0:
                             continue
                         scrape(data, each_date)
-
+        data.activated=True
+        data.save()
         return HttpResponseRedirect('scrape/')
 
             # for each in dates_in_month:
@@ -180,85 +188,92 @@ def form_view(request, *args, **kwargs):
     else:
         print("INVALID")
 
+    if data.activated:
+        # get dates
+        # startdate = data.startdate
+        # enddate = data.enddate
+        graydates_pre=0
+        # graydates_post=0
 
-    # get dates
-    # startdate = data.startdate
-    # enddate = data.enddate
-    graydates_pre=0
-    # graydates_post=0
+        month_index=0
+        #I could do the first one manually so i dont have to check if first month every time
+        for year in range(data.startdate.year, data.enddate.year+1):
+            for month in range(data.startdate.month, data.enddate.month+1):
+                dates_in_month = {date:getMealDictionary(date, month_index) for date in cal.itermonthdates(year, month)}
+                # print("BEST_MEALS:  ", best_meals)             
+                if month==data.startdate.month:
+                    for each in dates_in_month:
+                        if each < data.startdate:
+                            graydates_pre+=1
+                # if month==data.enddate.month:
+                #     for each in dates_in_month:
+                #         if each > data.enddate:
+                #             graydates_pre+=1
+                dates_in_calendar.append(dates_in_month)
+                month_index+=1
+                #print(dates_in_month[0])
+                # for each_date in dates_in_month:
+                #     if data.startdate <= each_date <= data.enddate:
+                        #MAKE SURE NOT REPEAT OURSELVES HERE
+                        #use unique_constraint then try unique_togetehr
+                        #dont make a meal unless it exists though... do this in scrape
+                        
+                        
+                        #all meals at times have been made. now we scrape at each day
+                        # scrape(data, each_date)
+                        #so now all options have been assigned to meals. next is to score them in the next view
 
-    month_index=0
-    #I could do the first one manually so i dont have to check if first month every time
-    for year in range(data.startdate.year, data.enddate.year+1):
-        for month in range(data.startdate.month, data.enddate.month+1):
-            dates_in_month = {date:getMealDictionary(date, month_index) for date in cal.itermonthdates(year, month)}
-            # print("BEST_MEALS:  ", best_meals)             
-            if month==data.startdate.month:
-                for each in dates_in_month:
-                    if each < data.startdate:
-                        graydates_pre+=1
-            # if month==data.enddate.month:
-            #     for each in dates_in_month:
-            #         if each > data.enddate:
-            #             graydates_pre+=1
-            dates_in_calendar.append(dates_in_month)
-            month_index+=1
-            #print(dates_in_month[0])
-            # for each_date in dates_in_month:
-            #     if data.startdate <= each_date <= data.enddate:
-                    #MAKE SURE NOT REPEAT OURSELVES HERE
-                    #use unique_constraint then try unique_togetehr
-                    #dont make a meal unless it exists though... do this in scrape
-                    
-                    
-                    #all meals at times have been made. now we scrape at each day
-                    # scrape(data, each_date)
-                    #so now all options have been assigned to meals. next is to score them in the next view
+        for each_tuple in best_meals:
+            (score, month_index, date, meal) = each_tuple
+            dates_in_calendar[month_index][date][meal] = dates_in_calendar[month_index][date][meal][:2]+(True,)
+        #                     # SCRAAAAPE
 
-    for each_tuple in best_meals:
-        (score, month_index, date, meal) = each_tuple
-        dates_in_calendar[month_index][date][meal] = dates_in_calendar[month_index][date][meal][:2]+(True,)
-    #                     # SCRAAAAPE
-
-                    
-
-
-        #get food scores at those meals
+                        
 
 
-    #select which swipes to use
-    
+            #get food scores at those meals
 
-    
-    # meals_context=list(meals.values())
 
-    # counter=0
-    # print(meals_context)
-    # for each in meals:
-    #     current = meals_context[counter]
-    #     current['score']=0
-    #     for option in each.options.all():
-    #          if option.score:
-    #              current['score'] += 1
+        #select which swipes to use
         
-    #     counter += 1
-    # print(meals_context)
 
-    #days = list(cal.itermonthdays(startdate.year, startdate.month))
-    context = {
-        #'meal_scores':meal_scores,
-        'form': list(form),
-        'dates_in_calendar': dates_in_calendar,
-        'data':data,
-        'graydates_pre':graydates_pre,
-        # 'graydates_post':graydates_post
-        #need meal data (score, selected) ie: Lunch: 10 o or Dinner: 0 x
-        #i think i have to make each month a dictionary, with keys pointing to the dict objects? or just with location/scores?
-        #a la [{Aug-1:}]
-    }
+        
+        # meals_context=list(meals.values())
+
+        # counter=0
+        # print(meals_context)
+        # for each in meals:
+        #     current = meals_context[counter]
+        #     current['score']=0
+        #     for option in each.options.all():
+        #          if option.score:
+        #              current['score'] += 1
+            
+        #     counter += 1
+        # print(meals_context)
+
+        #days = list(cal.itermonthdays(startdate.year, startdate.month))
+        context = {
+            #'meal_scores':meal_scores,
+            'form': list(form),
+            'dates_in_calendar': dates_in_calendar,
+            'data':data,
+            'graydates_pre':graydates_pre,
+            # 'graydates_post':graydates_post
+            #need meal data (score, selected) ie: Lunch: 10 o or Dinner: 0 x
+            #i think i have to make each month a dictionary, with keys pointing to the dict objects? or just with location/scores?
+            #a la [{Aug-1:}]
+        }
 
 
-    return render(request, "form.html", context)
+        return render(request, "calendar.html", context)
+
+    else:
+        context={
+            'form':list(form),
+            'data':data,
+        }
+        return render(request, "form.html", context)
 
 # def scrape_view(request, *args, **kwargs):
 #     data=Input_Data.objects.first()

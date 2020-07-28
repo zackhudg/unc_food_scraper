@@ -6,18 +6,19 @@
     <style>
         html *{
             border-radius: .3vh;
-            font-family: "Open Sans", sans-serif;        }
+            font-family: "Open Sans", sans-serif;        
+            }
 
-        main{
-            display:grid;
-            grid-template-columns: 1fr 4fr;
-            grid-template-rows:1fr;
+        html{
+            background-color:#4b9cd3;
 
         }
 
-        /* .calendar_container{
-            border: rgb(19, 41, 75) .5vh solid solid;
-        } */
+        main{
+            width:35%;
+            margin:0 auto;
+            display:block;
+        }
 
         .calendar_header{
             display:grid;
@@ -37,24 +38,21 @@
             justify-content: space-around;
             width:100%;
             height:7vh;
-            font-size: 5vh;
+            font-size: 3.5vh;
         }
 
         .days_header span{
             width:100%;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
             padding-top: 1vh;
             background-color:#f7f7f7;
-            border-left:.1vh solid white;
-            border-right:.1vh solid white;
-            margin:.1vh;
-        }
-
-        .form_block{
-            background-color: white;
-            padding:5px;
-            margin:5px;
-            overflow-y:auto;
+            border-left:.1vh solid #dddddd;
+            border-right:.1vh solid #dddddd;
+            margin:0vh;
+            border-radius: 0;
         }
 
         input[type='number'], input[type='date']{
@@ -70,18 +68,19 @@
         }
 
         li{
-            margin:.1vh;
+            margin:0vh;
             font-size: 19px;
             background-color:#f7f7f7;
             list-style: none;
-            border:.1vh solid white;
-            height:16.3vh;
+            border:.1vh solid #dddddd;
+            height:16vh;
             overflow-y:auto;
+            border-radius: 0;
             
         }
 
         .grayed_out{
-            background: lightgray;
+            color:#999999;
         }
 
         .true {
@@ -93,84 +92,85 @@
             display:flex;
             justify-content:space-between;
             padding:0;
-            margin:20px 5px;
-
+            margin:1.1vh auto;
+            width:95%;
         }
 
         .form_container *{
             padding:0;
             cursor:pointer;
-
+            font-size:1.5em;
         }
 
         input[type="checkbox"]{
             height:0;
             width:0;
             opacity:0;
+            position:absolute;
         }
-
-        .custom_check{
-            padding:0px;
-            width:1.5em;
-            height:1.5em;
-            display:block;
-            position:relative;
-            background-color:#eeeeee;
-        }
-
 
         .submit{
+            margin:0 auto;
+            width:95%;
             height:100%;
-            width:100%;
             background-color: rgb(19, 41, 75);
             color:white;
-            border-radius: 0;
             border: none;
-            font-size: 30px;
+            font-size: 2em;
             cursor:pointer;
         }
 
-        .custom_check:after{
-            content:"";
-            position:absolute;
+        .signout{
+            margin:0 auto;
             display:block;
-            height:1.5em;
-            width:0;
-            border:solid red;
-            border-width: 0 5px 0 0;
-            transform:translate(.63em, 0) rotate(45deg)
-        }
-        .custom_check:before{
-            content:"";
-            position:absolute;
-            display:block;
-            height:1.5em;
-            width:0;
-            border:solid red;
-            border-width: 0 5px 0 0;
-            transform:translate(.63em, 0) rotate(-45deg);
+            width:95%;
+            height:9vh;
+            background-color:#f0a456;
+            color:white;
+            border:none;
+            font-size:2em;
+            cursor:pointer;
         }
 
-        .form_container input:checked ~ .custom_check:after{
-            height:1em;
-            width:.5em;
-            border:solid #58b100;
-            border-width: 0 5px 5px 0;
-            transform:translate(.4em, -.1em) rotate(45deg);
+        .sidebar{
+            margin:1.5vh;
+            overflow-y: auto;
         }
-        .form_container input:checked ~ .custom_check:before{
-            display:none;
+        
+
+        .check_container{
+            width:100%;
+            height:100%;
+            text-align: center;
+            position:block;
+            margin:0 auto;
+            background-color:#f0f2f5;
+            user-select: none;
         }
 
-        form {
-            border: 5px solid #4b9cd3;
-            height:96vh;
+        .check_container span{
+            width:100%;
+            text-align: center;
+            height:100%;
             display:flex;
             flex-direction: column;
             justify-content: space-evenly;
-            margin:1.5vh;
+        }
 
-            overflow: auto;
+        .check_container input:checked ~ span{
+            background-color:#72984b;
+            color:white;
+        }
+
+
+        form {
+            height:93vh;
+            display:flex;
+            flex-direction: column;
+            justify-content: space-between;
+            
+            background-color:white;
+
         }
 
         p{
@@ -178,187 +178,41 @@
             border-radius: 0;
         }
 
-        hr {
+        br {
             padding:0;
-            margin:15px 5px;
+            margin:1.3vh 5px;
             color:#dddddd;
         }
 
-        form *{
-            font-size: 20px;
-        }
 
-        /* span{
-            align-self: flex-start;
-        }
 
-        input{
-            align-self: flex-end;
-        } */
     </style>
 </head>
 
 <main>
-    <form method='POST' class='input_form'>{% csrf_token %}
-        <label class="form_container"><span>Start Date</span>{{ form.0 }}</label>
+        <form method='POST' class='input_form sidebar'>{% csrf_token %}
+            <label class="form_container"><span>Start Date</span>{{ form.0 }}</label>
 
-        <label class="form_container"><span>End Date</span>{{ form.1 }}</label>
-        <label class="form_container"><span>{{form.2.label}}</span>{{ form.2 }}</label>
-        <hr />
-        <label class="form_container"><span>{{form.3.label}}</span>{{ form.3 }}<span class='custom_check'></span></label>
-        <label class="form_container"><span>{{form.4.label}}</span>{{ form.4 }}<span class='custom_check'></span></label>
-        <hr />
-        <label class="form_container check_container"><span>{{form.5.label}}</span>{{ form.5 }}<span class='custom_check'></span></label>
-        <label class="form_container check_container"><span>{{form.6.label}}</span>{{ form.6 }}<span class='custom_check'></span></label>
-        <label class="form_container check_container"><span>{{form.7.label}}</span>{{ form.7 }}<span class='custom_check'></span></label>
-        <label class="form_container check_container"><span>{{form.8.label}}</span>{{ form.8 }}<span class='custom_check'></span></label>
-        <hr />
-        <label class="form_container check_container"><span>Re-evalute Foods</span>{{ form.9 }}<span class='custom_check'></span></label>
-        <input class='submit' type='submit' value='Submit!'>
-    </form>
-
-    <div class='calendar_container'>
-        <div class='calendar_header'>
-            <h1 class='calendar_left'>&laquo; Prev</h1>
-            <h1 class='calendar_month' id="month_integer">{{ data.startdate.month }}</h1>
-            <h1 class='calendar_right'>Next &raquo;</h1>
-        </div>
-        <div class='days_header'>
-            <span>Sun</span>
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-
-        </div>
-        <div class="calendar_body">
-            {% for month in dates_in_calendar %}
-                {% ifequal forloop.counter0 0 %}
-                <ul class='month-{{ forloop.counter0|add:data.startdate.month }} current'>
-                    {% for day, value in month.items %}
-                        {% if data.startdate <= day and day <= data.enddate and day.month == forloop.parentloop.counter0|add:data.startdate.month %}
-                             <li class='day'>                       
-                                <p class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></p>
-
-                                {% if data.breakfast %}
-                                
-                                <p class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "0" %})</p>
-                                {% endif %}
-
-                                {% if data.brunch %}
-                                
-                                <p class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "0" %})</p>                                {% endif %}
-
-                                {% if data.lunch %}
-                                
-                                <p class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "0" %})</p>                                {% endif %}
-
-                                {% if data.dinner %}
-                                
-                                <p class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "0" %})</p> 
-                                {% endif %}
-                            </li>  
-                        {% elif day.month == forloop.parentloop.counter0|add:data.startdate.month %}
-                            <li class="grayed_out"><strong>{{day}}</strong></li>
-                        {% else %}
-                            <li class="grayed_out"></li>
-                        {% endif %}
-                          
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <ul class='month-{{ forloop.counter0|add:data.startdate.month }}' style="display:none;">
-                    {% for day, value in month.items %}
-                        {% if data.startdate <= day and day <= data.enddate and day.month == forloop.parentloop.counter0|add:data.startdate.month %}
-                             <li class='day'>                       
-                                <p class='{{ day|date:"o-m-d" }}'><strong>{{day}}</strong></p>
-
-                                {% if data.breakfast %}
-                                
-                                <p class='{{ value.breakfast.2|lower }}'>Breakfast - {{ value.breakfast.1|title }} ({% firstof value.breakfast.0 "0" %})</p>
-                                {% endif %}
-
-                                {% if data.brunch %}
-                                
-                                <p class='{{ value.brunch.2|lower }}'>Brunch - {{ value.brunch.1|title }} ({% firstof value.brunch.0 "0" %})</p>
-                                {% endif %}
-
-                                {% if data.lunch %}
-                                
-                                <p class='{{ value.lunch.2|lower }}'>Lunch - {{ value.lunch.1|title }} ({% firstof value.lunch.0 "0" %})</p>
-                                {% endif %}
-
-                                {% if data.dinner %}
-                                
-                                <p class='{{ value.dinner.2|lower }}'>Dinner - {{ value.dinner.1|title }} ({% firstof value.dinner.0 "0" %})</p>
-                                {% endif %}
-                            </li>  
-                        {% elif day.month == forloop.parentloop.counter0|add:data.startdate.month %}
-                            <li class="grayed_out"><strong>{{day}}</strong></li>
-                        {% else %}
-                            <li class="grayed_out"></li>
-                        {% endif %}
-                          
-                    {% endfor %}
-                </ul>
-                {% endifequal %}
-            {% endfor %}
-        </div>
-    </div>
+            <label class="form_container"><span>End Date</span>{{ form.1 }}</label>
+            <label class="form_container"><span>{{form.2.label}}</span>{{ form.2 }}</label>
+            <br />
+            <label class="form_container check_container">{{ form.3 }}<span>{{form.3.label|upper}}</span></label>
+            <label class="form_container check_container">{{ form.4 }}<span>{{form.4.label|upper}}</span></label>
+            <br />
+            <label class="form_container check_container">{{ form.5 }}<span>{{form.5.label|upper}}</span></label>
+            <label class="form_container check_container">{{ form.6 }}<span>{{form.6.label|upper}}</span></label>
+            <label class="form_container check_container">{{ form.7 }}<span>{{form.7.label|upper}}</span></label>
+            <label class="form_container check_container">{{ form.8 }}<span>{{form.8.label|upper}}</span></label>
+            <br />
+            <label class="form_container check_container">{{ form.3 }}<span>RE-EVALUATE FOODS</span></label>
+            <br />
+            <input class='submit' type='submit' value='Submit'>
+            <a bref="{% url 'logout' %}"><button class='signout'>Sign Out</button></a>
+        </form>
+        
+    {% block calendar %}
+    {% endblock %}
+    
 </main>
-<script>
-    let current = document.getElementsByClassName("current")[0];
-    let left = document.getElementsByClassName("calendar_left")[0];
-    let right = document.getElementsByClassName("calendar_right")[0];
-
-    left.addEventListener("click", prev_month);
-    right.addEventListener("click", next_month);
-
-    if (current.previousElementSibling==null){
-            left.innerHTML="";
-    }
-    if (current.nextElementSibling==null){
-            right.innerHTML="";
-    }
-
-    function prev_month(){
-        let prev_sibling = current.previousElementSibling;
-        if (prev_sibling==null){
-            return;
-        }
-
-        current.style.display="none";
-        prev_sibling.style.display="grid";
-        current = prev_sibling;
-        if (current.previousElementSibling==null){
-            left.innerHTML="";
-        }
-        right.innerHTML="Next »";
-
-        if(document.getElementById("month_integer").innerHTML == 1) document.getElementById("month_integer").innerHTML = 12;
-        else document.getElementById("month_integer").innerHTML = parseInt(document.getElementById("month_integer").innerHTML)-1;
-
-    }
-
-    function next_month(){
-        let next_sibling = current.nextElementSibling;
-        if (next_sibling==null){
-            return;
-        }
-
-        current.style.display="none";
-        next_sibling.style.display="grid";
-        current = next_sibling;
-        if (current.nextElementSibling==null){
-            right.innerHTML="";
-        }
-        left.innerHTML=" « Prev";
-
-        if(document.getElementById("month_integer").innerHTML == 12) document.getElementById("month_integer").innerHTML = 1;
-        else document.getElementById("month_integer").innerHTML = parseInt(document.getElementById("month_integer").innerHTML)+1;
-    }
-</script>
 
 {% endblock content %}

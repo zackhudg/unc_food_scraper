@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<head>
+    <style>
+        main{
+            display:grid;
+            grid-template-columns: 1fr 4fr;
+            grid-template-rows:1fr;
+            width:100%;
+        }
+    </style>
+</head>
+<main>
+    <form method="post"> {% csrf_token %}{{ form.as_p }}
+        <input class='submit' type='submit' value='Submit!'>
+    </form>
+    <div class='expo'>
+
+    </div>
+</main>
+
+{% endblock %}

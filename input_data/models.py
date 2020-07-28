@@ -6,6 +6,8 @@ import datetime
 class Input_Data(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE, null=True)
 
+    activated=models.BooleanField(default=False)
+
     startdate=models.DateField(default=datetime.date.today)
     enddate=models.DateField(default=datetime.date.today)
 
