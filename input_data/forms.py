@@ -2,7 +2,6 @@ from django import forms
 from .models import Input_Data, Option, User
 from django.contrib.auth.forms import UserCreationForm
 
-
 class DateInputType(forms.DateInput):
     input_type='date'
 
@@ -16,7 +15,6 @@ class InputForm(forms.ModelForm):
         }
 
 class TinderSwipeForm(forms.ModelForm):
-   
     class Meta:
         model = Option
         fields=['score']
@@ -25,7 +23,6 @@ class TinderSwipeForm(forms.ModelForm):
         }    
     
 class UserCreateForm(UserCreationForm):
-
     class Meta:
         model = User
         fields = ("username", "password1", "password2")
@@ -33,8 +30,3 @@ class UserCreateForm(UserCreationForm):
             'username': None,
             'password1': None,
         }
-
-
-# class RawInputForm(forms.Form):
-#     dates=forms.DateField()
-#     swipes=forms.IntegerField()
