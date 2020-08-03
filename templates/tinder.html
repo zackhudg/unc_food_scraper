@@ -29,7 +29,7 @@
         <div class='options_grid'>
         {% for form in all_option_forms %}
             <div class='option_container'>
-                {{ form.instance.option }}
+                {{ form.instance.optionname.name }}
                 {{ form.as_p }}    
             </div>
         {% endfor %}

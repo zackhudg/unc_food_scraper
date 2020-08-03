@@ -11,7 +11,7 @@ class Input_Data(models.Model):
     startdate=models.DateField(default=datetime.date.today)
     enddate=models.DateField(default=datetime.date.today)
 
-    swipes=models.IntegerField(default=0)
+    swipes=models.PositiveIntegerField(default=1)
 
     lenoir=models.BooleanField(default=True)
     chase=models.BooleanField(default=False)
@@ -27,18 +27,22 @@ class Input_Data(models.Model):
 
     #id=userid
 
-class Option(models.Model):
-    needsjudgement=models.BooleanField(default=True)  #then, on render set to false
+class Option_Name(models.Model):
+    name=models.TextField(unique=True)
 
-    option=models.TextField(unique=True)
+class Option(models.Model):
+    optionname=models.ForeignKey(Option_Name, on_delete=models.CASCADE)
+    calendar=models.ForeignKey(Input_Data, on_delete=models.CASCADE)
+
+    needsjudgement=models.BooleanField(default=True)  #then, on render set to false
     score=models.BooleanField(default=False)
+
 
 class Meal(models.Model):
     
-
     #many to one -> eventually when score not tied to this, make it many to many
-    calendar = models.ForeignKey(Input_Data, on_delete=models.CASCADE)
-    options = models.ManyToManyField(Option)
+    calendar = models.ManyToManyField(Input_Data)
+    options = models.ManyToManyField(Option_Name)
 
     MEAL_CHOICES=[
         ('breakfast','breakfast'),

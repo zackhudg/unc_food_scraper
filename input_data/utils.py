@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-from .models import Meal, Option
+from .models import Meal, Option_Name
 
 
 # meals=list()
@@ -57,7 +57,8 @@ def scrape_helper(data, date, url, location):
 
     if ctabsnav is None: 
         try:               # yes magic strings ikik
-            Meal.objects.create(date=date,meal='none',location=location, calendar=data)
+            new_meal = Meal.objects.create(date=date,meal='none',location=location)
+            new_meal.calendar.add(data)
             return
         except Exception:
             pass
@@ -100,7 +101,8 @@ def scrape_helper(data, date, url, location):
             # if Meal.objects.filter(date=date,meal=meal_string.lower(),location=location).count() > 0:
             #     continue
             try:
-                current_meal = Meal.objects.create(date=date,meal=meal_string.lower(),location=location, calendar=data)
+                current_meal = Meal.objects.create(date=date,meal=meal_string.lower(),location=location)
+                current_meal.calendar.add(data)
             except Exception:
                 pass
 
@@ -120,10 +122,10 @@ def scrape_helper(data, date, url, location):
                     #     set_food_score("Deli", food)
                     # if Option.objects.filter(option='Deli').count() == 0:
                     try:
-                        Option.objects.create(option='Deli')  #creates object here, will iterate throug and get scores later
+                        Option_Name.objects.create(name='Deli')  #creates object here, will iterate throug and get scores later
                     except Exception:
                         pass
-                    current_meal.options.add(Option.objects.get(option='Deli'))
+                    current_meal.options.add(Option_Name.objects.get(name='Deli'))
                     # current_meal.add("Deli")
                     # score += food["Deli"]
 
@@ -141,10 +143,10 @@ def scrape_helper(data, date, url, location):
                     current_option = option.text.strip()
                     try:
                     # if Option.objects.filter(option=current_option).count() == 0:
-                        Option.objects.create(option=current_option)  #creates object here, will iterate throug and get scores later
+                        Option_Name.objects.create(name=current_option)  #creates object here, will iterate throug and get scores later
                     except Exception:
                         pass
-                    current_meal.options.add(Option.objects.get(option=current_option))
+                    current_meal.options.add(Option_Name.objects.get(name=current_option))
 
                     
                     # if current_option not in food:
@@ -163,13 +165,6 @@ def scrape_helper(data, date, url, location):
     
 
     #pass
-
-def set_food_score(option):
-    #so like we have to provide a screen where option name is displayed and a 'yes/no', then save
-    #that to a new modelobject 
-    #set custom superlike score maybe eventually
-    
-    pass
 
 
 
